@@ -4,8 +4,7 @@ Time-Correlated Errors search correlating Nagios High System Load for network de
 
 I think this is actually a better version
 
-( index=nagios statusnotification=CRITICAL OR statusnotification=WARNING )  OR (index=cisco tag=error NOT host=*wlc* NOT host=*wrls* ) | eval epoch=round(_time/ (60 * 5), 0) | eval correlated_issues=if(sourcetype == "nagios", null, sourcetype + " | " + _raw) | eval error_time=if(sourcetype == "nagios", strftime(_time, "%m-%d-%y %H: %M"), null) | stats list(error_time) AS error_time list(src_host) AS src_host list(correlated_issues) AS correlated_issues BY epoch | search error_time=* src_host=* correlated_issues=*  | sort - epoch | fields - epoch
-
+( index=nagios statusnotification=CRITICAL OR statusnotification=WARNING )  OR (index=cisco tag=error NOT host=*wlc* NOT host=*wrls* ) OR ( index=fwsm tag=error)  | eval epoch=round(_time/ (60 * 5), 0) | eval correlated_issues=if(sourcetype == "nagios", null, sourcetype + " | " + _raw) | eval error_time=if(sourcetype == "nagios", strftime(_time, "%m-%d-%y %H: %M"), null) | stats list(error_time) AS error_time list(src_host) AS src_host list(correlated_issues) AS correlated_issues BY epoch | search error_time=* src_host=* correlated_issues=*  | sort - epoch | fields - epoch
 
 Compare volume 3 weeks vs this week - showing anomolies with std dev, anything outside of 3 is troublsome
 

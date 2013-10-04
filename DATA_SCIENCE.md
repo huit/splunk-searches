@@ -1,0 +1,3 @@
+Time-Correlated Errors search correlating Nagios High System Load for network devices against errors in the cisco index
+
+(index=nagios perfdata=SERVICEPERFDATA name="System Load" severity="WARNING" OR secerity="CRITICAL" )  OR (index=cisco tag=error NOT host=*wlc* NOT host=*wrls* )| rex field=load_1_min "(?<cpu_load>.+)%" | eval epoch=round(_time/ (60 * 5), 0) | eval correlated_issues=if(sourcetype == "nagiosserviceperf", null, sourcetype + " | " + _raw) | eval error_time=if(sourcetype == "nagiosserviceperf", strftime(_time, "%m-%d-%y %H: %M"), null) | stats list(error_time) AS error_time list(src_host) AS src_host list(correlated_issues) AS correlated_issues BY epoch | search error_time=* src_host=* correlated_issues=*  | sort - epoch | fields - epoch
